@@ -1,6 +1,7 @@
 "use client";
 
 import { updateUserAction } from "@/actions/user";
+import { FormFieldInput } from "@/components/form/form-field-input";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,14 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -29,11 +23,9 @@ import {
 import { UpdateUserData, updateUserSchema } from "@/schemas/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@prisma/client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { FormFieldInput } from "@/components/form/form-field-input";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface EditUserDialogProps {
   user: User;
@@ -47,17 +39,23 @@ export function EditUserDialog({
   onOpenChange,
 }: EditUserDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const defaultValues = {
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    emailVerified: !!user.emailVerified,
+  };
 
   // Initialize form
   const form = useForm<UpdateUserData>({
     resolver: zodResolver(updateUserSchema),
-    defaultValues: {
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      emailVerified: !!user.emailVerified,
-    },
+    defaultValues,
   });
+
+  // Reset form values when user prop changes
+  React.useEffect(() => {
+    form.reset(defaultValues);
+  }, [user, form]);
 
   // Handle form submission
   const onSubmit = async (data: UpdateUserData) => {
@@ -112,9 +110,6 @@ export function EditUserDialog({
                   <SelectItem value="ADMIN">Admin</SelectItem>
                 </SelectContent>
               </Select>
-            </FormFieldInput>
-            <FormFieldInput control={form.control} name="emailVerified" label="Email Verified" variant="inline">
-              <Checkbox />
             </FormFieldInput>
             <DialogFooter>
               <Button

@@ -1,9 +1,9 @@
-import { validateToken } from "@/actions/password-reset";
-import { ResetPasswordForm } from "@/components/auth/reset-password-form";
+import { validateToken } from "@/actions/validate-token";
 import { PageParams } from "@/types";
+import { ResetPasswordForm } from "./reset-password-form";
 
 export default async function Page({ params }: PageParams<{ token: string }>) {
   const { token } = await params;
-  let isTokenValid = !!(await validateToken(token));
+  const isTokenValid = !!(await validateToken(token));
   return <ResetPasswordForm token={token} isTokenValid={isTokenValid} />;
 }

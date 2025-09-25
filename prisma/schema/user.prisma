@@ -6,6 +6,8 @@ model User {
   password      String?
   image         String?
   role          Role      @default(USER)
+  phone         String?
+  address       String?
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime  @default(now())

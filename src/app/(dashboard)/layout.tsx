@@ -4,22 +4,11 @@ import { SiteHeader } from "@/components/site-header";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-import { auth } from "@/auth";
-import { User } from "@prisma/client";
-
 export default async function layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
-
-  if (!session?.user) {
-    return;
-  }
-
-  const user = { ...session.user, image: session.user.image ?? null } as User
-
   return (
     <SidebarProvider
       style={
@@ -29,10 +18,7 @@ export default async function layout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar
-        user={user}
-        variant="inset"
-      />
+      <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">

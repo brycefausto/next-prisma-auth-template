@@ -1,29 +1,18 @@
 "use client";
 
-import * as React from "react";
 import {
   IconCamera,
-  IconChartBar,
-  IconCopy,
   IconDashboard,
-  IconDatabase,
   IconFileAi,
   IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
   IconHome,
   IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
   IconSettings,
   IconUserCircle,
-  IconUsers,
   IconUsersGroup,
 } from "@tabler/icons-react";
+import * as React from "react";
 
-import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -36,7 +25,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { User } from "@prisma/client";
+import { useSession } from "next-auth/react";
 
 const data = {
   navMain: [
@@ -155,11 +144,11 @@ const data = {
   ],
 };
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user: User;
-}
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
 
-export function AppSidebar({ user, ...props }: AppSidebarProps) {
+export function AppSidebar({ ...props }: AppSidebarProps) {
+  const { data: session } = useSession();
+  const user = session?.user;
   if (!user) {
     throw new Error("AppSidebar requires a user but received undefined.");
   }

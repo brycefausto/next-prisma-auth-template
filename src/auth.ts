@@ -5,6 +5,7 @@ import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { comparePassword } from "./lib/password.utils";
 import prisma from "./lib/prisma";
+import { userService } from "./services/user.service";
 
 // Extend the User type to include 'role'
 declare module "next-auth" {
@@ -62,17 +63,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, session, trigger }) {
       // If the user object exists on sign-in, add the user ID to the token
       if (user) {
         token.id = user.id;
         token.role = user.role;
+      }
+      if (trigger === "update" && session) {
+        // Logic to update JWT based on new user data
+        token.name = session.user.name as string;
+        token.email = session.user.email;
+        // ... other updates
       }
       return token;
     },
     async session({ session, token }) {
       // Add the user ID from the token to the session object
       session.user.id = token.id as string;
+      session.user.name = token.name;
+      session.user.email = token.email as string;
       session.user.role = token.role as Role;
       return session;
     },
@@ -119,4 +128,17 @@ export async function checkAuth(roles?: Role | Role[]) {
   if (!session && checkRole) {
     throw new Error("Unauthorized");
   }
+}
+
+export async function getUserSession() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return null;
+  }
+  const user = await userService.getUserById(session.user.id);
+  if (!user) {
+    return null;
+  }
+
+  return user;
 }

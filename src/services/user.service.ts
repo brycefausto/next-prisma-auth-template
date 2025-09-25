@@ -1,12 +1,12 @@
 import { checkAuth } from "@/auth";
+import { CreateUserDto, UpdateUserDto } from "@/interfaces/user.dto";
 import { hashPassword } from "@/lib/password.utils";
 import { PrismaClient, Role, User } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
 export class UserService {
   // CREATE
-  async createUser(data: Omit<User, "id" | "createdAt" | "updatedAt">) {
+  async createUser(data: CreateUserDto) {
     await checkAuth(Role.ADMIN);
     return prisma.user.create({
       data,
@@ -57,9 +57,15 @@ export class UserService {
   // UPDATE
   async updateUser(
     id: string,
-    data: Partial<Omit<User, "id" | "createdAt" | "updatedAt">>
+    data: UpdateUserDto
   ) {
     await checkAuth(Role.ADMIN);
+    // Unverify email when the email is updated
+    const user = await prisma.user.findUnique({ where: { id, email: data.email } });
+    if (!user) {
+      data.emailVerified = null;
+    }
+    if (data.email)
     return prisma.user.update({
       where: { id },
       data,

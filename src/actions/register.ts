@@ -1,4 +1,5 @@
 "use server";
+
 import { RegisterData } from "@/schemas/auth";
 import { ActionResultState } from "@/types";
 import { PrismaClient, User } from "@prisma/client";

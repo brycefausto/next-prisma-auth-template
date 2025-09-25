@@ -17,11 +17,11 @@ import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import ErrorAlert from "../alert/error-alert";
-import { FormFieldInput } from "../form/form-field-input";
-import LoadingButton from "../form/loading-button";
-import { Form } from "../ui/form";
-import { PasswordInput } from "../ui/password-input";
+import ErrorAlert from "@/components/alert/error-alert";
+import { FormFieldInput } from "@/components/form/form-field-input";
+import LoadingButton from "@/components/form/loading-button";
+import { Form } from "@/components/ui/form";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function LoginForm({
   className,

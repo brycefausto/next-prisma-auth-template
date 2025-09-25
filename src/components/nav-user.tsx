@@ -25,8 +25,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import LogoutButton from "./auth/logout-button";
-import { User } from "@prisma/client";
 import Link from "next/link";
+import { User } from "next-auth";
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
@@ -64,7 +64,7 @@ export function NavUser({ user }: { user: User }) {
                 <Avatar className="h-8 w-8 rounded-lg">
                   {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
                   <AvatarFallback className="rounded-lg uppercase">
-                    {user.name.slice(0, 2)}
+                    {user.name?.slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">

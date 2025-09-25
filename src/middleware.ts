@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 export default auth((request) => {
   const isLoggedIn = !!request.auth;
+  const session = request.auth;
 
   const { pathname } = request.nextUrl;
 

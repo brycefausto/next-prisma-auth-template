@@ -7,23 +7,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  ForgotPasswordData,
-  forgotPasswordSchema,
-} from "@/schemas/auth";
+import { ForgotPasswordData, forgotPasswordSchema } from "@/schemas/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
-import { Terminal } from "lucide-react";
-import { Alert, AlertDescription } from "../ui/alert";
-
 import { requestPasswordResetAction } from "@/actions/password-reset";
+import ErrorAlert from "@/components/alert/error-alert";
+import SuccessAlert from "@/components/alert/success-alert";
+import { FormFieldInput } from "@/components/form/form-field-input";
+import LoadingButton from "@/components/form/loading-button";
+import { Form } from "@/components/ui/form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormFieldInput } from "../form/form-field-input";
-import LoadingButton from "../form/loading-button";
-import { Form } from "../ui/form";
 
 export function ForgotPasswordForm() {
   const [error, setError] = useState("");
@@ -71,18 +67,8 @@ export function ForgotPasswordForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <Alert className="mb-4 border border-red-500" variant="destructive">
-              <Terminal className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {success && (
-            <Alert className="mb-4 border border-green-500">
-              <Terminal className="h-4 w-4" />
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          )}
+          <ErrorAlert message={error} setMessage={setError} />
+          <SuccessAlert message={success} setMessage={setSuccess} />
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">

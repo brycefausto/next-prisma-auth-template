@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AlertDescription } from "../ui/alert";
 import DismissableAlert from "./dismissable-alert";
@@ -36,7 +35,6 @@ export default function Message({
         }
       }}
     >
-      <Terminal className="h-4 w-4" />
       <AlertDescription>{message}</AlertDescription>
     </DismissableAlert>
   );

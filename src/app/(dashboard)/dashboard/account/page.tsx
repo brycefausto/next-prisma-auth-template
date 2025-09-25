@@ -1,16 +1,10 @@
-import { auth } from "@/auth";
-import AccountForm from "@/components/auth/account-form";
-import { userService } from "@/services/user.service";
-import { forbidden } from "next/navigation";
+import AccountForm from "@/app/(dashboard)/dashboard/account/account-form";
+import { getUserSession } from "@/auth";
 
 export default async function Page() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    forbidden();
-  }
-  const user = await userService.getUserById(session.user.id);
+  const user = await getUserSession();
   if (!user) {
-    forbidden();
+    throw new Error("Unauthorized");
   }
 
   return <AccountForm user={user} />;

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   FormField,
@@ -7,22 +7,24 @@ import {
   FormControl,
   FormDescription,
   FormMessage,
-} from "@/components/ui/form"
-import { ReactElement, cloneElement } from "react"
-import { Control, FieldValues, Path } from "react-hook-form"
+} from "@/components/ui/form";
+import { cn } from "@/lib/utils";
+import { ReactElement, cloneElement } from "react";
+import { Control, FieldValues, Path } from "react-hook-form";
 
-type Variant = "default" | "inline"
+type Variant = "default" | "inline";
 
 interface FormFieldInputProps<T extends FieldValues> {
-  control: Control<T>
-  name: Path<T>
-  label?: string
-  description?: string
-  message?: string
+  control: Control<T>;
+  name: Path<T>;
+  label?: string;
+  description?: string;
+  message?: string;
   /** Child component (must be a single input-like component) */
-  children: ReactElement<object>
+  children: ReactElement<object>;
+  className?: string;
   /** Layout variant: default (stacked) or inline (for checkbox/switch) */
-  variant?: Variant
+  variant?: Variant;
 }
 
 export function FormFieldInput<T extends FieldValues>({
@@ -32,6 +34,7 @@ export function FormFieldInput<T extends FieldValues>({
   description,
   message,
   children,
+  className,
   variant = "default",
 }: FormFieldInputProps<T>) {
   return (
@@ -40,7 +43,11 @@ export function FormFieldInput<T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem
-          className={variant === "inline" ? "flex flex-row items-center space-x-3 space-y-0" : ""}
+          className={cn(
+            variant === "inline" &&
+              "flex flex-row items-center space-x-3 space-y-0",
+            className
+          )}
         >
           {variant === "default" && label && <FormLabel>{label}</FormLabel>}
 
@@ -58,5 +65,5 @@ export function FormFieldInput<T extends FieldValues>({
         </FormItem>
       )}
     />
-  )
+  );
 }

@@ -25,6 +25,10 @@ import { useState } from "react";
 import { DeleteUserDialog } from "./delete-user-dialog";
 import { EditUserDialog } from "./edit-user-dialog";
 import { CreateUserDialog } from "./create-user-dialog";
+import { useSession } from "next-auth/react";
+import { Tooltip } from "@/components/ui/tooltip";
+import { getUserFromSession } from "@/auth-client";
+import { Badge } from "@/components/ui/badge";
 
 // // User type definition based on the schema
 // type User = {
@@ -43,6 +47,7 @@ export default function UserList({
   users: User[];
   totalPages: number;
 }) {
+  const authUser = getUserFromSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -119,7 +124,14 @@ export default function UserList({
                 users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      {user.email}
+                      {user.id == authUser.id && (
+                        <Badge variant="outline" className="ml-2">
+                          Current User
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
@@ -138,31 +150,33 @@ export default function UserList({
                       {toDateString(user.createdAt)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <IconDots className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handleEditUser(user)}
-                          >
-                            <IconEdit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => handleDeleteUser(user)}
-                          >
-                            <IconTrash className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {authUser.id != user.id && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <IconDots className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleEditUser(user)}
+                            >
+                              <IconEdit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => handleDeleteUser(user)}
+                            >
+                              <IconTrash className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

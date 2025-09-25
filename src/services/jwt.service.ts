@@ -1,22 +1,28 @@
 // lib/services/userService.ts
 import { SECRET_KEY } from "@/config/env";
-import { PrismaClient, User } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import { userService } from "./user.service";
 
 const prisma = new PrismaClient();
-
 export interface ResetPasswordDto {
   token: string;
   password: string;
 }
-
 export interface TokenPayload {
   userId: string;
 }
-
+export class InvalidTokenError extends Error {
+  constructor() {
+    super();
+    this.message = "Invalid token or expired";
+  }
+}
 export class JWTService {
   createToken(userId: string) {
-    const payload: TokenPayload = { userId };
+    const payload: TokenPayload = {
+      userId,
+    };
     return jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
   }
 
@@ -32,18 +38,21 @@ export class JWTService {
     });
   }
 
-  // CREATE
-  async createUser(data: Omit<User, "id" | "createdAt" | "updatedAt">) {
-    return prisma.user.create({
-      data,
-    });
-  }
+  async getUserFromToken(token: string) {
+    try {
+      const payload: TokenPayload | undefined = await this.verifyToken(token);
 
-  // DELETE
-  async deleteUser(id: string): Promise<User> {
-    return prisma.user.delete({
-      where: { id },
-    });
+      if (payload) {
+        const user = await userService.getUserById(payload.userId);
+
+        return user;
+      } else {
+        return;
+      }
+    } catch (error: any) {
+      console.log(error.message);
+      return;
+    }
   }
 }
 

@@ -1,8 +1,9 @@
 "use server";
+
 import { CreateUserData, UpdateUserData } from "@/schemas/user";
 import { userService } from "@/services/user.service";
 import { ActionResultState } from "@/types";
-import { Role, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import _ from "lodash";
 import { revalidatePath } from "next/cache";
 
@@ -10,13 +11,8 @@ export async function createUserAction(
   data: CreateUserData
 ): Promise<ActionResultState<User>> {
   try {
-    const createDto = _.pick(data, ["email", "name", "password"]);
-    const user = await userService.createUser({
-      ...createDto,
-      role: Role.ADMIN,
-      emailVerified: null,
-      image: null,
-    });
+    const createDto = _.omit(data, ["confirmPassword"]);
+    const user = await userService.createUser(createDto);
 
     revalidatePath("/users");
 
@@ -36,11 +32,8 @@ export async function updateUserAction(
   data: UpdateUserData
 ): Promise<ActionResultState<User>> {
   try {
-    let emailVerified = data.emailVerified ? new Date() : null;
     const user = await userService.updateUser(id, {
       ...data,
-      emailVerified,
-      image: null,
     });
     revalidatePath("/users");
 
@@ -55,9 +48,7 @@ export async function updateUserAction(
   }
 }
 
-export async function deleteUserAction(
-  id: string,
-): Promise<ActionResultState> {
+export async function deleteUserAction(id: string): Promise<ActionResultState> {
   try {
     await userService.deleteUser(id);
     revalidatePath("/users");
@@ -70,4 +61,3 @@ export async function deleteUserAction(
     return { message: "Failed to update user" };
   }
 }
-
