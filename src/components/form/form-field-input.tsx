@@ -1,16 +1,21 @@
 "use client";
 
 import {
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { ReactElement, cloneElement } from "react";
-import { Control, FieldValues, Path } from "react-hook-form";
+import {
+  Control,
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+} from "react-hook-form";
 
 type Variant = "default" | "inline";
 
@@ -21,10 +26,12 @@ interface FormFieldInputProps<T extends FieldValues> {
   description?: string;
   message?: string;
   /** Child component (must be a single input-like component) */
-  children: ReactElement<object>;
+  children?: ReactElement<object>;
   className?: string;
   /** Layout variant: default (stacked) or inline (for checkbox/switch) */
   variant?: Variant;
+  required?: boolean;
+  render?: (field: ControllerRenderProps<T, Path<T>>) => React.ReactElement;
 }
 
 export function FormFieldInput<T extends FieldValues>({
@@ -34,8 +41,10 @@ export function FormFieldInput<T extends FieldValues>({
   description,
   message,
   children,
+  render,
   className,
   variant = "default",
+  required,
 }: FormFieldInputProps<T>) {
   return (
     <FormField
@@ -49,14 +58,22 @@ export function FormFieldInput<T extends FieldValues>({
             className
           )}
         >
-          {variant === "default" && label && <FormLabel>{label}</FormLabel>}
+          {variant === "default" && label && (
+            <FormLabel>
+              {label}
+              {required && <span className="text-destructive"> *</span>}
+            </FormLabel>
+          )}
+          {children && (
+            <FormControl>
+              {cloneElement(children, {
+                ...field,
+                ...children.props, // preserve manually passed props
+              })}
+            </FormControl>
+          )}
 
-          <FormControl>
-            {cloneElement(children, {
-              ...field,
-              ...children.props, // preserve manually passed props
-            })}
-          </FormControl>
+          {render && <FormControl>{render(field)}</FormControl>}
 
           {variant === "inline" && label && <FormLabel>{label}</FormLabel>}
 

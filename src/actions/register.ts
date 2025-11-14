@@ -1,6 +1,9 @@
 "use server";
 
+import { signIn } from "@/auth";
 import { RegisterData } from "@/schemas/auth";
+import { CreateCompanyData } from "@/schemas/company";
+import { bookAccountService } from "@/services/book-account.service";
 import { ActionResultState } from "@/types";
 import { PrismaClient, User } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -8,7 +11,8 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 export async function registerAction(
-  registerData: RegisterData
+  registerData: RegisterData,
+  companyData: CreateCompanyData
 ): Promise<ActionResultState<User>> {
   const { email, password, name } = registerData;
 
@@ -28,6 +32,24 @@ export async function registerAction(
       password: hashedPassword,
     },
   });
+
+  const company = await prisma.company.create({
+    data: {
+      ...companyData,
+      user: {
+        connect: { id: user.id },
+      },
+    },
+  });
+
+  await bookAccountService.createDefaultAccounts(user.id, company.id);
+
+  await signIn("credentials", {
+    email,
+    password,
+    redirect: false
+  });
+
   return {
     success: true,
     data: user,

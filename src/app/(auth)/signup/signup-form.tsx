@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,15 +12,15 @@ import { useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { registerAction } from "@/actions/register";
-import { RegisterData, registerSchema } from "@/schemas/auth";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import ErrorAlert from "@/components/alert/error-alert";
 import { FormFieldInput } from "@/components/form/form-field-input";
 import LoadingButton from "@/components/form/loading-button";
 import { Form } from "@/components/ui/form";
 import { PasswordInput } from "@/components/ui/password-input";
+import { RegisterData, registerSchema } from "@/schemas/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useFormStore } from "./store";
 
 export function SignupForm({
   className,
@@ -39,19 +38,25 @@ export function SignupForm({
       email: "",
       password: "",
       confirmPassword: "",
+      phone: "",
+      address: "",
     },
   });
+  const formStore = useFormStore();
 
   function onSubmit(data: RegisterData) {
     startTransition(async () => {
       try {
-        const result = await registerAction(data);
+        // const result = await registerAction(data);
 
-        if (result.data) {
-          router.push("/dashboard");
-        } else {
-          throw Error(result.message);
-        }
+        // if (result.data) {
+        //   router.push("/dashboard");
+        // } else {
+        //   throw Error(result.message);
+        // }
+        console.log("submit clicked");
+        formStore.setUserData(data);
+        formStore.nextStep();
       } catch (error: any) {
         setError(error.message);
       }
@@ -89,14 +94,28 @@ export function SignupForm({
                   name="password"
                   label="Password"
                 >
-                  <PasswordInput placeholder="Password" />
+                  <PasswordInput placeholder="Password" autoComplete="new-password" />
                 </FormFieldInput>
                 <FormFieldInput
                   control={form.control}
-                  name="password"
+                  name="confirmPassword"
                   label="Confirm Password"
                 >
                   <PasswordInput placeholder="Confirm Password" />
+                </FormFieldInput>
+                <FormFieldInput
+                  control={form.control}
+                  name="phone"
+                  label="Phone"
+                >
+                  <Input placeholder="Phone" />
+                </FormFieldInput>
+                <FormFieldInput
+                  control={form.control}
+                  name="address"
+                  label="Address"
+                >
+                  <Input placeholder="Address" />
                 </FormFieldInput>
                 <div className="flex flex-col gap-3">
                   <LoadingButton
@@ -104,11 +123,11 @@ export function SignupForm({
                     type="submit"
                     className="w-full"
                   >
-                    Sign Up
+                    Next
                   </LoadingButton>
-                  <Button variant="outline" className="w-full">
+                  {/* <Button variant="outline" className="w-full">
                     Sign Up with Google
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
               <div className="mt-4 text-center text-sm">

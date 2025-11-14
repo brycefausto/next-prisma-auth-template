@@ -1,16 +1,8 @@
 "use client";
 
+import { deleteUserAction } from "@/actions/user";
+import { DeleteDialog } from "@/components/dialogs/DeleteDialog";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 interface DeleteUserDialogProps {
@@ -31,44 +23,34 @@ export function DeleteUserDialog({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: "DELETE",
-      });
+      const result = await deleteUserAction(userId);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete user");
+      if (!result.success) {
+        throw new Error(result.message || "Failed to delete user");
       }
 
       toast.success("User deleted successfully");
       onOpenChange(false);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete user");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete user");
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently delete the user <span className="font-medium">{userName}</span> and remove their data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {isDeleting ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <DeleteDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Are you sure?"
+      description={
+        <>
+          This will permanently delete the user{" "}
+          <span className="font-medium">{userName}</span>.
+        </>
+      }
+      onConfirm={handleDelete}
+      isLoading={isDeleting}
+    />
   );
 }

@@ -1,13 +1,12 @@
 import { userService } from "@/services/user.service";
 import UserList from "./user-list";
-import { getUserSession } from "@/auth";
+import { ParamsWithQuery } from "@/types";
+import { parseSearchParams } from "@/lib/paramUtils";
 
-export default async function Page() {
- const { users, totalPages } = await userService.getUsers(1, 10);
+export default async function Page({ searchParams }: ParamsWithQuery) {
+  const params = await searchParams;
+  const { page, search } = parseSearchParams(params);
+  const { users, totalPages } = await userService.find({ page, search });
 
- const isAuth = await getUserSession();
-
- return (
-  <UserList users={users} totalPages={totalPages} />
- )
+  return <UserList users={users} totalPages={totalPages} />;
 }

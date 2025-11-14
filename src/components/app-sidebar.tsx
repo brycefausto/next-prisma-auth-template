@@ -1,13 +1,16 @@
 "use client";
 
 import {
-  IconCamera,
+  Icon,
+  IconBuilding,
   IconDashboard,
-  IconFileAi,
-  IconFileDescription,
   IconHome,
   IconInnerShadowTop,
+  IconNotebook,
+  IconProps,
+  IconReport,
   IconSettings,
+  IconTableDashed,
   IconUserCircle,
   IconUsersGroup,
 } from "@tabler/icons-react";
@@ -25,9 +28,25 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Role } from "@prisma/client";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useAuth } from "@/hooks/use-auth";
+import { isArray } from "lodash";
 
-const data = {
+type MenuItem = {
+  title: string;
+  url: string;
+  icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
+  userRoles?: Role | Role[];
+};
+
+type MenuData = {
+  navMain: MenuItem[];
+  navSecondary: MenuItem[];
+};
+
+const data: MenuData = {
   navMain: [
     {
       title: "Dashboard",
@@ -38,6 +57,37 @@ const data = {
       title: "Users",
       url: "/dashboard/users",
       icon: IconUsersGroup,
+      userRoles: Role.ADMIN,
+    },
+    {
+      title: "Chart of Accounts",
+      url: "/dashboard/chart-of-accounts",
+      icon: IconTableDashed,
+      userRoles: [Role.OWNER, Role.BOOKKEEPER],
+    },
+    {
+      title: "Journal Entries",
+      url: "/dashboard/journal-entries",
+      icon: IconNotebook,
+      userRoles: [Role.OWNER, Role.BOOKKEEPER],
+    },
+    {
+      title: "General Ledger",
+      url: "/dashboard/ledger",
+      icon: IconNotebook,
+      userRoles: [Role.OWNER, Role.BOOKKEEPER],
+    },
+        {
+      title: "Statements",
+      url: "/dashboard/statements",
+      icon: IconNotebook,
+      userRoles: [Role.OWNER, Role.BOOKKEEPER],
+    },
+        {
+      title: "Reports",
+      url: "/dashboard/reports",
+      icon: IconReport,
+      userRoles: [Role.OWNER, Role.BOOKKEEPER],
     },
     {
       title: "Account",
@@ -45,77 +95,15 @@ const data = {
       icon: IconUserCircle,
     },
     {
+      title: "Company",
+      url: "/dashboard/company",
+      icon: IconBuilding,
+      userRoles: Role.OWNER,
+    },
+    {
       title: "Setting",
       url: "/dashboard/setting",
       icon: IconSettings,
-    },
-    // {
-    //   title: "Lifecycle",
-    //   url: "#",
-    //   icon: IconListDetails,
-    // },
-    // {
-    //   title: "Analytics",
-    //   url: "#",
-    //   icon: IconChartBar,
-    // },
-    // {
-    //   title: "Projects",
-    //   url: "#",
-    //   icon: IconFolder,
-    // },
-    // {
-    //   title: "Team",
-    //   url: "#",
-    //   icon: IconUsers,
-    // },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
     },
   ],
   navSecondary: [
@@ -125,33 +113,30 @@ const data = {
       icon: IconHome,
     },
   ],
-  documents: [
-    // {
-    //   name: "Data Library",
-    //   url: "#",
-    //   icon: IconDatabase,
-    // },
-    // {
-    //   name: "Reports",
-    //   url: "#",
-    //   icon: IconReport,
-    // },
-    // {
-    //   name: "Word Assistant",
-    //   url: "#",
-    //   icon: IconFileWord,
-    // },
-  ],
 };
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
 
 export function AppSidebar({ ...props }: AppSidebarProps) {
-  const { data: session } = useSession();
-  const user = session?.user;
-  if (!user) {
-    throw new Error("AppSidebar requires a user but received undefined.");
+  const { user } = useAuth();
+  const userRole = user.role || Role.OWNER;
+
+  function filterByRole(menuItems: MenuItem[], role: Role) {
+    return menuItems.filter(
+      (it) =>
+        !it.userRoles ||
+        (it.userRoles &&
+          ((isArray(it.userRoles) && it.userRoles.includes(role)) ||
+            it.userRoles == role))
+    );
   }
+
+  const filteredMenuData = Object.fromEntries(
+    Object.entries(data).map(([key, menuItems]) => {
+      return [key, filterByRole(menuItems, userRole)];
+    })
+  ) as MenuData;
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -161,18 +146,21 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <Link href="/dashboard">
                 <IconInnerShadowTop className="!size-5" />
                 <span className="text-base font-semibold">Dashboard</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={filteredMenuData.navMain} />
         {/* <NavDocuments items={data.documents} /> */}
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavSecondary
+          items={filteredMenuData.navSecondary}
+          className="mt-auto"
+        />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

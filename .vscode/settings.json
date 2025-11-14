@@ -12,5 +12,8 @@
     "**/.next": true,
     ".next": true
   },
-  "explorerExclude.backup": {}
+  "explorerExclude.backup": {},
+  "prisma-smart-formatter.typescript.defaultFormatter": "esbenp.prettier-vscode",
+  "prisma-smart-formatter.typescriptreact.defaultFormatter": "esbenp.prettier-vscode",
+  "prisma-smart-formatter.prisma.defaultFormatter": "Prisma.prisma"
 }

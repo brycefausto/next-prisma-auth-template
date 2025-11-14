@@ -1,4 +1,5 @@
 import { Role } from "@prisma/client";
+import _ from "lodash";
 
 export interface CreateUserDto {
   name: string;
@@ -19,3 +20,8 @@ export interface UpdateUserDto {
   address?: string;
   emailVerified?: null;
 }
+
+export const userRoleOptions = Object.values(Role).map((value) => ({
+  value,
+  label: _.capitalize(value),
+}));

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import {
   UpdateAccountData,
-  UpdateAccountSchema,
+  updateAccountSchema,
 } from "@/schemas/update-account";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@prisma/client";
@@ -21,6 +21,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { ChangePasswordDialog } from "./change-password-dialog";
 import EmailVerificationButton from "./email-verification-button";
+import { Label } from "@/components/ui/label";
+import _ from "lodash";
 
 export default function AccountForm({ user }: { user: User }) {
   const [isPending, startTransition] = useTransition();
@@ -28,7 +30,7 @@ export default function AccountForm({ user }: { user: User }) {
   const { data: session, update } = useSession();
 
   const form = useForm<UpdateAccountData>({
-    resolver: zodResolver(UpdateAccountSchema),
+    resolver: zodResolver(updateAccountSchema),
     defaultValues: {
       name: user.name ?? "",
       email: user.email ?? "",
@@ -91,6 +93,10 @@ export default function AccountForm({ user }: { user: User }) {
               >
                 <Input type="email" placeholder="youremail@example.com" />
               </FormFieldInput>
+              <div className="grid gap-3">
+                <Label>Role</Label>
+                <span className="text-lg font-medium">{_.capitalize(user.role)}</span>
+              </div>
 
               <EmailVerificationButton user={user} />
 

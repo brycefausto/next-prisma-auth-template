@@ -20,9 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { userRoleOptions } from "@/interfaces/user.dto";
 import { UpdateUserData, updateUserSchema } from "@/schemas/user";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -97,17 +98,16 @@ export function EditUserDialog({
             </FormFieldInput>
             <FormFieldInput control={form.control} name="role" label="Role">
               <Select
-                defaultValue={form.getValues("role") as "USER" | "ADMIN"}
-                onValueChange={(value) =>
-                  form.setValue("role", value as "USER" | "ADMIN")
-                }
+                defaultValue={form.getValues("role") as Role}
+                onValueChange={(value) => form.setValue("role", value as Role)}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="USER">User</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
+                  {userRoleOptions.map(({ value, label }) => (
+                    <SelectItem value={value}>{label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormFieldInput>

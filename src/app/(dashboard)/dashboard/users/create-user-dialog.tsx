@@ -22,8 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { userRoleOptions } from "@/interfaces/user.dto";
 import { CreateUserData, createUserSchema } from "@/schemas/user";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Role } from "@prisma/client";
 import { IconUserPlus } from "@tabler/icons-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -41,7 +43,7 @@ export function CreateUserDialog() {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "USER",
+      role: "OWNER",
     },
   });
 
@@ -105,22 +107,26 @@ export function CreateUserDialog() {
             >
               <PasswordInput placeholder="••••••••" />
             </FormFieldInput>
-            <FormFieldInput control={form.control} name="role" label="Role">
-              <Select
-                defaultValue={form.getValues("role") as "USER" | "ADMIN"}
-                onValueChange={(value) =>
-                  form.setValue("role", value as "USER" | "ADMIN")
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USER">User</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormFieldInput>
+            <FormFieldInput
+              control={form.control}
+              name="role"
+              label="Role"
+              render={(field) => (
+                <Select
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userRoleOptions.map(({ value, label }) => (
+                      <SelectItem value={value}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             <DialogFooter>
               <Button
                 type="button"

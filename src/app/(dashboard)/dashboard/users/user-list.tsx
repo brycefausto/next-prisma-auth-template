@@ -1,5 +1,9 @@
 "use client";
 
+import { getUserFromSession } from "@/auth-client";
+import { AppPagination } from "@/components/app-pagination";
+import SearchInput from "@/components/inputs/search-input";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,17 +22,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import usePageUtils from "@/hooks/use-page-utils";
 import { toDateString } from "@/lib/date.utils";
 import { User } from "@prisma/client";
 import { IconDots, IconEdit, IconLoader, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
+import { CreateUserDialog } from "./create-user-dialog";
 import { DeleteUserDialog } from "./delete-user-dialog";
 import { EditUserDialog } from "./edit-user-dialog";
-import { CreateUserDialog } from "./create-user-dialog";
-import { useSession } from "next-auth/react";
-import { Tooltip } from "@/components/ui/tooltip";
-import { getUserFromSession } from "@/auth-client";
-import { Badge } from "@/components/ui/badge";
 
 // // User type definition based on the schema
 // type User = {
@@ -59,6 +60,15 @@ export default function UserList({
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  const {
+    page,
+    searchValue,
+    changePage,
+    handleSearchClick,
+    handleSearchChange,
+    handleSearchEnter,
+  } = usePageUtils();
+
   // Handle edit user
   const handleEditUser = (user: User) => {
     setEditingUser(user);
@@ -81,6 +91,12 @@ export default function UserList({
           </p>
         </div>
         <div className="flex gap-2">
+          <SearchInput
+            value={searchValue}
+            onChange={handleSearchChange}
+            onKeyDown={handleSearchEnter}
+            onClick={handleSearchClick}
+          />
           <CreateUserDialog />
         </div>
       </div>
@@ -98,7 +114,7 @@ export default function UserList({
           <IconLoader className="animate-spin h-8 w-8 text-primary" />
         </div>
       ) : (
-        <div className="rounded-md border overflow-hidden">
+        <div className="rounded-md border bg-card p-4 overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -183,6 +199,11 @@ export default function UserList({
               )}
             </TableBody>
           </Table>
+          <AppPagination
+            initialPage={page}
+            total={totalPages}
+            onChangePage={changePage}
+          />
         </div>
       )}
 

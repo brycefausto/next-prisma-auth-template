@@ -48,7 +48,6 @@ export function LoginForm({
           password,
           redirect: false,
         });
-        console.log({ res });
 
         if (!res.error) {
           router.push("/dashboard");

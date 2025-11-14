@@ -1,5 +1,5 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { Role } from "@prisma/client";
+import { Company, Role } from "@prisma/client";
 import { isArray } from "lodash";
 import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -7,10 +7,11 @@ import { comparePassword } from "./lib/password.utils";
 import prisma from "./lib/prisma";
 import { userService } from "./services/user.service";
 
-// Extend the User type to include 'role'
 declare module "next-auth" {
   interface User {
+    id: string;
     role?: Role;
+    company?: Company;
   }
 }
 
@@ -41,6 +42,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           const user = await prisma.user.findUnique({
             where: { email },
+            include: {
+              company: true,
+            },
           });
 
           if (!user || !user.password) {
@@ -55,6 +59,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: user.email,
             name: user.name,
             role: user.role,
+            company: user.company ?? undefined,
           };
         } catch (error: any) {
           throw new CustomAuthError(error.message);
@@ -67,7 +72,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // If the user object exists on sign-in, add the user ID to the token
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
         token.role = user.role;
+        token.company = user.company;
       }
       if (trigger === "update" && session) {
         // Logic to update JWT based on new user data
@@ -83,6 +91,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.name = token.name;
       session.user.email = token.email as string;
       session.user.role = token.role as Role;
+      session.user.company = token.company as Company;
       return session;
     },
   },
@@ -110,22 +119,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-function checkRoles(role: Role, roles?: Role | Role[]) {
-  if (isArray(roles)) {
-    return roles.includes(role);
+function checkRoles(role: Role, requiredRoles?: Role | Role[]) {
+  if (isArray(requiredRoles)) {
+    return requiredRoles.includes(role);
   } else {
-    return roles == role;
+    return requiredRoles == role;
   }
 }
 
-export async function checkAuth(roles?: Role | Role[]) {
+export async function checkAuth(...requiredRoles: Role[]) {
   const session = await auth();
   const checkRole =
-    roles && session?.user?.role
-      ? checkRoles(session?.user?.role, roles)
+    requiredRoles && session?.user?.role
+      ? checkRoles(session?.user?.role, requiredRoles)
       : true;
 
-  if (!session && checkRole) {
+  if (!session || !checkRole) {
     throw new Error("Unauthorized");
   }
 }
@@ -135,8 +144,9 @@ export async function getUserSession() {
   if (!session?.user?.id) {
     return null;
   }
-  const user = await userService.getUserById(session.user.id);
-  if (!user) {
+  const user = await userService.findById(session.user.id);
+  if (user == null) {
+    console.log("The user is null");
     return null;
   }
 

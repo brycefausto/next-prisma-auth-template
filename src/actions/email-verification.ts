@@ -11,7 +11,7 @@ export async function requestEmailVerificationAction(
   email: string
 ): Promise<ActionResultState> {
   try {
-    const user = await userService.getUserByEmail(email);
+    const user = await userService.findByEmail(email);
 
     if (user) {
       const token = jwtService.createToken(user.id);

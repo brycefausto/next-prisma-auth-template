@@ -1,17 +1,22 @@
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-  role          Role      @default(USER)
-  phone         String?
-  address       String?
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String         @id @default(cuid())
+  name              String
+  email             String         @unique
+  emailVerified     DateTime?
+  password          String?
+  image             String?
+  role              Role           @default(OWNER)
+  phone             String?
+  address           String?
+  accounts          Account[]
+  sessions          Session[]
+  company           Company?
+  bookkeeper        Bookkeeper?
+  bookAccounts      BookAccount[]
+  journalEntries    JournalEntry[]
+  journalEntryLines EntryLine[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model Account {
@@ -26,6 +31,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
+  deactivated       Boolean?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -40,7 +46,7 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role         Role     @default(USER)
+  role         Role     @default(OWNER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -54,6 +60,7 @@ model VerificationToken {
 }
 
 enum Role {
-  USER
+  BOOKKEEPER
+  OWNER
   ADMIN
 }

@@ -4,7 +4,7 @@ import HomeFooter from "./home-footer";
 
 export default async function HomeLayout({ children }: PropsWithChildren) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <HomeHeader />
       {children}
       <HomeFooter />

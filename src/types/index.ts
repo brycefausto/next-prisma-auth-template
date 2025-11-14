@@ -34,4 +34,3 @@ export interface SessionData {
   role?: string;
   [key: string]: any;
 }
-

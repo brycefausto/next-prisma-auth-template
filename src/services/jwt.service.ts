@@ -43,7 +43,7 @@ export class JWTService {
       const payload: TokenPayload | undefined = await this.verifyToken(token);
 
       if (payload) {
-        const user = await userService.getUserById(payload.userId);
+        const user = await userService.findById(payload.userId);
 
         return user;
       } else {

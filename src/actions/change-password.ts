@@ -13,7 +13,7 @@ export async function changePasswordAction(
   newPassword: string
 ): Promise<ActionResultState> {
   try {
-    const user = await userService.getUserByIdAndPassword(userId, oldPassword);
+    const user = await userService.findByIdAndPassword(userId, oldPassword);
 
     if (!user) {
       throw new Error("Invalid Password");

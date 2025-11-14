@@ -1,5 +1,6 @@
 import { hashPassword } from "@/lib/password.utils";
 import { PrismaClient, Role } from "@prisma/client";
+import { seedBookkeepingData } from "./seed/bookkeeping.seed";
 
 const prisma = new PrismaClient();
 
@@ -12,6 +13,9 @@ async function main() {
       role: Role.ADMIN,
     },
   });
+  if (process.env.NODE_ENV !== "production") {
+    await seedBookkeepingData(prisma);
+  }
 }
 
 main()
